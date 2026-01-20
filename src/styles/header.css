@@ -1,0 +1,74 @@
+/* Header / navigation styles to improve contrast */
+:root { --header-height: 64px; }
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: transparent;
+  border-bottom: none;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+/* Ensure nav does not wrap or increase header height */
+.site-nav { display:flex; gap:12px; align-items:center; flex-wrap:nowrap; overflow:hidden; }
+.site-nav a { display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
+.site-nav .user { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.site-nav button { display:inline-block; }
+
+/* subtle drop shadow on header contents to improve contrast over image */
+ .site-header .inner { text-shadow: none; }
+.site-header .inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+}
+.site-header .logo {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+.site-nav { margin-left: 12px; display:flex; gap:12px; align-items:center; }
+.site-nav a { color: #fff; text-decoration: none; margin-right: 12px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.6); display:inline-block; padding:6px 8px; border-radius:8px; transition: box-shadow 160ms, transform 120ms; }
+.hamburger { display: none; color: #fff; background: none; border: none; }
+
+/* Desktop hover: white frame effect */
+.site-nav a:hover, .site-nav a:focus {
+  color: #fff;
+  background: rgba(255,255,255,0.03);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.95);
+  transform: translateY(-1px);
+}
+
+/* On small screens the menu uses a light panel, use subtle dark hover */
+@media (max-width: 640px) {
+  .site-nav a:hover, .site-nav a:focus { background: rgba(0,0,0,0.06); box-shadow: none; transform:none; }
+}
+.site-nav .login-button {
+  background: rgba(255,255,255,0.9);
+  color: #1A2A80;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight:600;
+}
+.site-nav .login-button:hover { opacity: 0.95; }
+/* Ensure links are readable on small screens */
+@media (max-width: 640px) {
+  .hamburger { background: none; border: none; padding: 8px; margin-left: auto; display: inline-flex; align-items:center; justify-content:center; cursor: pointer; }
+  .site-nav { position: absolute; right: 16px; top: var(--header-height); background: rgba(255,255,255,0.95); border-radius: 8px; padding: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); display: none; flex-direction: column; min-width: 200px; }
+  .site-nav a { display:block; padding: 12px 0; font-size: 16px; color: rgba(0,0,0,0.92); margin-right: 0; }
+  .site-nav.open { display: flex; }
+  .site-nav button { display:block; margin-top:8px; }
+  .site-header .inner { padding: 0 12px; }
+  :root { --header-height: 56px; }
+}

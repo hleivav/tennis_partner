@@ -1,0 +1,291 @@
+/* Responsive register card and avatar for mobile */
+.register-card {
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 2em 1em;
+}
+@media (max-width: 540px) {
+  .register-card {
+    padding: 1em 0.2em;
+    max-width: 98vw;
+  }
+  .register-card form {
+    max-width: 98vw;
+    padding: 0;
+    gap: 10px;
+  }
+  .register-card label,
+  .register-card input,
+  .register-card select {
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .register-card .avatar-card.large.selected {
+    width: 90px !important;
+    height: 90px !important;
+  }
+  .register-card .avatar-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+}
+/* Login modal position adjustment */
+.login-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+.login-modal-content {
+  background: #111;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 320px;
+  max-width: 480px;
+  box-sizing: border-box;
+  margin-top: 0;
+  transition: margin-top 0.2s;
+}
+@media (min-width: 700px) {
+  .login-modal-backdrop {
+    align-items: start;
+  }
+  .login-modal-content {
+    margin-top: 10vh;
+  }
+}
+/* Responsive search input for SearchPlayers */
+@media (max-width: 540px) {
+  #nameSearch {
+    min-width: 0 !important;
+    max-width: 98vw !important;
+    width: 100% !important;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  label[for="nameSearch"] {
+    font-size: 1em;
+    padding-left: 2px;
+    padding-bottom: 4px;
+  }
+}
+/* Responsive profile avatar and controls */
+@media (max-width: 540px) {
+  .profile-card form {
+    gap: 10px;
+  }
+  .profile-card .avatar-card.large.selected {
+    width: 80px !important;
+    height: 80px !important;
+    margin: 0 auto;
+  }
+  .profile-card .avatar-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+  .profile-card .avatar-row button {
+    font-size: 22px !important;
+    margin: 0 8px;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+/* Responsive invitation card styles */
+.invitation-card {
+  margin-bottom: 24px;
+  padding: 20px;
+  max-width: 480px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+.invitation-card-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.invitation-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.invitation-info {
+  min-width: 0;
+}
+.invitation-name {
+  font-weight: 600;
+  font-size: 22px;
+  word-break: break-word;
+}
+.invitation-email, .invitation-phone {
+  color: #888;
+  font-size: 15px;
+  word-break: break-all;
+}
+.invitation-level {
+  font-size: 15px;
+}
+.invitation-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+@media (max-width: 540px) {
+  .invitation-card {
+    padding: 10px 2px;
+    max-width: 98vw;
+  }
+  .invitation-card-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .invitation-avatar {
+    width: 60px;
+    height: 60px;
+  }
+  .invitation-name {
+    font-size: 18px;
+  }
+  .invitation-info {
+    font-size: 14px;
+  }
+  .invitation-actions {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .invitation-actions button {
+    width: 100%;
+    min-width: 0;
+    font-size: 1em;
+  }
+}
+/* Responsive profile card and form for mobile */
+.profile-card {
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 2em 1em;
+}
+@media (max-width: 540px) {
+  .profile-card {
+    padding: 1em 0.2em;
+    max-width: 98vw;
+  }
+  .profile-card form {
+    max-width: 98vw;
+    padding: 0;
+    gap: 10px;
+  }
+  .profile-card label,
+  .profile-card input,
+  .profile-card select {
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .profile-card .avatar-card.large.selected {
+    width: 90px !important;
+    height: 90px !important;
+  }
+  .profile-card .checkbox-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+header nav a {
+  margin-right: 8px;
+  color: #1a2a80;
+  text-decoration: none;
+}
+
+header nav a:hover {
+  text-decoration: none;
+}
+
+/* Envelope icon for invitations */
+.envelope-flyin {
+  position: absolute;
+  top: -18px;
+  right: -32px;
+  z-index: 10;
+  animation: envelope-flyin-anim 1.2s cubic-bezier(.4,1.6,.6,1) 1;
+  /* pointer-events removed to allow click */
+}
+@keyframes envelope-flyin-anim {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.5) rotate(-20deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(8px) scale(1.1) rotate(4deg);
+  }
+  80% {
+    transform: translateY(-2px) scale(0.98) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
