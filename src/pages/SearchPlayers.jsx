@@ -68,16 +68,18 @@ export default function SearchPlayers() {
     if (!curr) return;
     // Skicka inbjudan till mottagaren
     try {
+      const isAlreadyChosen = chosen.includes(curr.id);
       await apiSendInvitation(currentUser.id, curr.id);
-      alert('Inbjudan skickad!');
+      if (isAlreadyChosen) {
+        setChosen(prev => prev.filter(id => id !== curr.id)); // avmarkera
+        alert('Inbjudan har återtagits');
+      } else {
+        setChosen(prev => [...prev, curr.id]); // markera
+        alert('Inbjudan skickad!');
+      }
     } catch (e) {
       alert('Kunde inte skicka inbjudan: ' + e.message);
     }
-    setChosen(prev =>
-      prev.includes(curr.id)
-        ? prev.filter(id => id !== curr.id) // avmarkera om redan vald
-        : [...prev, curr.id] // annars markera
-    );
     // Här skulle man i riktig app även skapa/ta bort en inbjudan i databasen
   }
 

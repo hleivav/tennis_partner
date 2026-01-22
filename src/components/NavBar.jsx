@@ -46,12 +46,16 @@ export default function NavBar() {
       if (!user) return;
       try {
         const invitations = await apiListInvitations(user.id);
+        console.log('[NavBar] invitations från backend:', invitations);
         setHasNewInvitations(invitations.some(inv => !inv.status || inv.status === 'new'));
       } catch (e) {
         setHasNewInvitations(false);
       }
     }
     checkInvitations();
+    const handler = () => { checkInvitations(); };
+    window.addEventListener('invitationsChanged', handler);
+    return () => window.removeEventListener('invitationsChanged', handler);
   }, [user]);
 
   function handleLogout() {

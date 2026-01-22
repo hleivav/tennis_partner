@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getCurrentUser, updateProfile } from '../services/auth';
-import { apiGetUserById, apiListUsers, apiListInvitations, apiAcceptInvitation, apiIgnoreInvitation } from '../services/api';
+import { apiGetUserById, apiListUsers, apiListInvitations, apiAcceptInvitation, apiIgnoreInvitation, apiPendingInvitation } from '../services/api';
 import Modal from '../components/Modal';
 
 const FILTERS = [
@@ -75,14 +75,18 @@ export default function Invitations() {
     const refreshInvitations = async () => {
       const invList = await apiListInvitations(user.id);
       setInvitations(invList);
+      window.dispatchEvent(new CustomEvent('invitationsChanged'));
     };
     if (modal.type === 'ignore') {
       apiIgnoreInvitation(modal.inv.id).then(refreshInvitations);
     } else if (modal.type === 'pending') {
-      // Sätt status till 'pending' lokalt (om det finns stöd i backend, lägg till endpoint!)
-      const updated = invitations.map(i => i === modal.inv ? { ...i, status: 'pending' } : i);
-      setInvitations(updated);
-      updateProfile({ ...user, invitations: updated });
+      // Sätt status till pending i backend
+      apiPendingInvitation(modal.inv.id).then(() => {
+        apiListInvitations(user.id).then(invList => {
+          setInvitations(invList);
+          window.dispatchEvent(new CustomEvent('invitationsChanged'));
+        });
+      });
     } else if (modal.type === 'accept') {
       apiAcceptInvitation(modal.inv.id).then(refreshInvitations);
     } else if (modal.type === 'delete') {
@@ -90,6 +94,7 @@ export default function Invitations() {
       const updated = invitations.filter(i => i !== modal.inv);
       setInvitations(updated);
       updateProfile({ ...user, invitations: updated });
+      window.dispatchEvent(new CustomEvent('invitationsChanged'));
     }
     setModal({ open: false });
   }

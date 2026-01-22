@@ -1,3 +1,12 @@
+// Sätt en inbjudan till pending
+export async function apiPendingInvitation(invitationId) {
+  const res = await fetch(`http://localhost:8080/api/invitations/${invitationId}/pending`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) throw new Error('Kunde inte sätta inbjudan till avvaktar');
+  return await res.json();
+}
 // Acceptera en inbjudan
 export async function apiAcceptInvitation(invitationId) {
   const res = await fetch(`http://localhost:8080/api/invitations/${invitationId}/accept`, {
