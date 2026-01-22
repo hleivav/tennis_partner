@@ -1,50 +1,68 @@
-import { apiRegister, apiLogin, apiUpdateUser, apiResetPassword } from './api.js';
+import { apiRegister, apiLogin, apiUpdateUser, apiForgotPassword } from './api.js';
 
 const CURR_KEY = 'tp_current';
 const TOKEN_KEY = 'tp_token';
 
+
+
 export async function register(user) {
-  // register at mock API and then log in to receive token
-  const created = await apiRegister(user);
-  const loginRes = await apiLogin(user.email, user.password);
-  localStorage.setItem(CURR_KEY, JSON.stringify(loginRes.user));
-  localStorage.setItem(TOKEN_KEY, loginRes.token);
-  window.dispatchEvent(new Event('storage'));
-  return loginRes.user;
+  // Registrera och logga in mot backend
+  await apiRegister(user);
+  return await login(user.email, user.password);
 }
 
 export async function login(email, password) {
   const res = await apiLogin(email, password);
-  localStorage.setItem(CURR_KEY, JSON.stringify(res.user));
-  localStorage.setItem(TOKEN_KEY, res.token);
-  window.dispatchEvent(new Event('storage'));
-  return res.user;
+  // Hantera både {user, token} och direkt user-objekt
+  const user = res.user || res;
+  const token = res.token;
+  console.log('[auth.js] login: user =', user, 'token =', token);
+  if (user) {
+    localStorage.setItem(CURR_KEY, JSON.stringify(user));
+    console.log('[auth.js] login: saved user to localStorage', user);
+  }
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+    console.log('[auth.js] login: saved token to localStorage', token);
+  }
+  window.dispatchEvent(new Event('authchange'));
+  return user;
 }
 
 export function logout() {
-  localStorage.removeItem(CURR_KEY);
-  localStorage.removeItem(TOKEN_KEY);
-  window.dispatchEvent(new Event('storage'));
+  try {
+    localStorage.removeItem(CURR_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {}
+  window.dispatchEvent(new Event('authchange'));
 }
 
 export function getCurrentUser() {
   try {
-    return JSON.parse(localStorage.getItem(CURR_KEY));
+    const stored = localStorage.getItem(CURR_KEY);
+    console.log('[auth.js] getCurrentUser: localStorage CURR_KEY =', stored);
+    if (stored) {
+      const user = JSON.parse(stored);
+      console.log('[auth.js] getCurrentUser: parsed user =', user);
+      return user;
+    } else {
+      console.log('[auth.js] getCurrentUser: localStorage CURR_KEY is empty or null');
+    }
   } catch (e) {
-    return null;
+    console.log('[auth.js] getCurrentUser: error parsing localStorage', e);
   }
+  console.log('[auth.js] getCurrentUser: no user found');
+  return null;
 }
 
 export async function updateProfile(updated) {
   const user = await apiUpdateUser(updated);
-  localStorage.setItem(CURR_KEY, JSON.stringify(user));
-  window.dispatchEvent(new Event('storage'));
+  if (user) localStorage.setItem(CURR_KEY, JSON.stringify(user));
   return user;
 }
 
-// Reset password: generates a simple password on the client-side or accepts one provided by caller
-export async function resetPassword(email, newPassword = null) {
-  const pw = newPassword || Array.from({ length: 5 }).map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('');
-  await apiResetPassword(email, pw);
-  return pw;
+// Skickar riktig forgot-password-request till backend
+export async function forgotPassword(email) {
+  await apiForgotPassword(email);
+  return true;
 }

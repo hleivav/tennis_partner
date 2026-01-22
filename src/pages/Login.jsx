@@ -17,7 +17,7 @@ export default function Login() {
     e.preventDefault();
     try {
       await login((form.email || '').trim(), form.password);
-      navigate('/');
+      navigate('/'); // landningssidan
     } catch (error) {
       setErr(error.message);
     }

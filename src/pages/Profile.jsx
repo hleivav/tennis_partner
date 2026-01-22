@@ -36,12 +36,9 @@ export default function Profile() {
   const [avatarIndex, setAvatarIndex] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
-
   useEffect(() => {
     setUser(getCurrentUser());
-    const onStorage = () => setUser(getCurrentUser());
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    // Ingen mockad storage-lyssnare behövs längre
   }, []);
 
   useEffect(() => {
@@ -89,7 +86,19 @@ export default function Profile() {
     e.preventDefault();
     setSaving(true);
     try {
-      const updated = await updateProfile({ ...user, ...form });
+      // Only send fields backend expects: id, name, email, password, role, phone, level, avatar, seekingPartner
+      const payload = {
+        id: user.id,
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: user.role, // keep role unchanged unless you want to allow editing
+        phone: form.phone,
+        level: form.level,
+        avatar: form.avatar,
+        seekingPartner: form.seekingPartner
+      };
+      const updated = await updateProfile(payload);
       setUser(updated);
       setDirty(false);
       alert('Profil sparad');
@@ -141,7 +150,7 @@ export default function Profile() {
           </label>
           <label>
             E-post
-            <input name="email" value={form.email} onChange={onChange} disabled />
+            <input name="email" value={form.email} onChange={onChange} />
           </label>
           <label>
             Telefon

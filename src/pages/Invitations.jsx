@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getCurrentUser, updateProfile } from '../services/auth';
-import { apiGetUserById, apiListUsers } from '../services/api';
+import { apiGetUserById, apiListUsers, apiListInvitations, apiAcceptInvitation, apiIgnoreInvitation } from '../services/api';
 import Modal from '../components/Modal';
 
 const FILTERS = [
@@ -24,11 +24,16 @@ export default function Invitations() {
     const u = getCurrentUser();
     if (!u) return;
     setUser(u);
-    setInvitations(u.invitations || []);
-    Promise.all((u.invitations || []).map(inv => apiGetUserById(inv.fromId))).then(users => {
-      const map = {};
-      users.forEach(u => { if (u) map[u.id] = u; });
-      setPlayers(map);
+    // Hämta inbjudningar från backend
+    apiListInvitations(u.id).then(invList => {
+      console.log('[Invitations.jsx] apiListInvitations response:', invList);
+      setInvitations(invList);
+      // Hämta avsändarens info för varje inbjudan
+      Promise.all(invList.map(inv => inv.sender && inv.sender.id ? apiGetUserById(inv.sender.id) : null)).then(users => {
+        const map = {};
+        users.forEach(user => { if (user) map[user.id] = user; });
+        setPlayers(map);
+      });
     });
   }, []);
 
@@ -55,24 +60,34 @@ export default function Invitations() {
         text: 'Den här spelaren kommer inte längre att visas på din lista. Vill du ignorera hen?',
         confirm: true
       });
+    } else if (action === 'delete') {
+      setModal({
+        open: true,
+        type: 'delete',
+        inv,
+        text: 'Vill du ta bort denna inbjudan permanent?',
+        confirm: true
+      });
     }
   }
 
   function handleModalOk() {
+    const refreshInvitations = async () => {
+      const invList = await apiListInvitations(user.id);
+      setInvitations(invList);
+    };
     if (modal.type === 'ignore') {
-      // Ta bort inbjudan från listan
-      const updated = invitations.filter(i => i !== modal.inv);
-      setInvitations(updated);
-      // Spara till profil
-      updateProfile({ ...user, invitations: updated });
+      apiIgnoreInvitation(modal.inv.id).then(refreshInvitations);
     } else if (modal.type === 'pending') {
-      // Sätt status till 'pending'
+      // Sätt status till 'pending' lokalt (om det finns stöd i backend, lägg till endpoint!)
       const updated = invitations.map(i => i === modal.inv ? { ...i, status: 'pending' } : i);
       setInvitations(updated);
       updateProfile({ ...user, invitations: updated });
     } else if (modal.type === 'accept') {
-      // Sätt status till 'accepted' (eller ta bort från listan om så önskas)
-      const updated = invitations.map(i => i === modal.inv ? { ...i, status: 'accepted' } : i);
+      apiAcceptInvitation(modal.inv.id).then(refreshInvitations);
+    } else if (modal.type === 'delete') {
+      // Ta bort inbjudan helt (om det finns stöd i backend, lägg till endpoint!)
+      const updated = invitations.filter(i => i !== modal.inv);
       setInvitations(updated);
       updateProfile({ ...user, invitations: updated });
     }
@@ -88,9 +103,13 @@ export default function Invitations() {
   }
 
   // Hide invitations from superadmin
+  // Visa alla inbjudningar om status är null eller saknas
   const filtered = invitations.filter(i => {
-    if (i.status !== filter) return false;
-    const p = players[i.fromId];
+    // Om status är null, visa som "new"
+    let status = i.status || 'new';
+    status = typeof status === 'string' ? status.toLowerCase() : status;
+    if (status !== filter) return false;
+    const p = players[i.sender.id];
     if (!p) return false;
     if (p.email === 'hleiva@hotmail.com') return false;
     return true;
@@ -114,10 +133,10 @@ export default function Invitations() {
       </div>
       {filtered.length === 0 && <div>Inga inbjudningar i denna kategori.</div>}
       {filtered.map((inv, idx) => {
-        const p = players[inv.fromId];
+        const p = players[inv.sender.id];
         if (!p) return null;
         return (
-          <div key={inv.fromId} className="card invitation-card">
+          <div key={inv.id} className="card invitation-card">
             <div className="invitation-card-content">
               <img src={p.avatar} alt="avatar" className="invitation-avatar" />
               <div className="invitation-info">
@@ -125,10 +144,14 @@ export default function Invitations() {
                 <div className="invitation-email">{p.email}</div>
                 <div className="invitation-phone">{p.phone}</div>
                 <div className="invitation-level"><strong>Nivå:</strong> {p.level}</div>
+                <div className="invitation-status"><strong>Status:</strong> {inv.status || 'ny'}</div>
+                <div className="invitation-date"><strong>Skapad:</strong> {inv.createdAt ? inv.createdAt : 'okänt'}</div>
               </div>
             </div>
             <div className="invitation-actions">
-              {(filter === 'accepted') ? (
+              {filter === 'ignored' ? (
+                <button onClick={() => handleAction(inv, 'delete')}>Ta bort</button>
+              ) : filter === 'accepted' ? (
                 <>
                   <button onClick={() => handleAction(inv, 'pending')}>Avvakta</button>
                   <button onClick={() => handleAction(inv, 'ignore')}>Ignorera</button>
@@ -153,7 +176,7 @@ export default function Invitations() {
         <div style={{ whiteSpace: 'pre-line', fontSize: 17, marginBottom: 18, color: '#222' }}>{modal.text}</div>
         {modal.confirm ? (
           <div style={{ display: 'flex', gap: 16, justifyContent: 'flex-end' }}>
-            <button onClick={handleModalOk}>Ok</button>
+            <button onClick={handleModalOk}>{modal.type === 'delete' ? 'Ta bort' : 'Ok'}</button>
             <button onClick={handleModalCancel}>Avbryt</button>
           </div>
         ) : (

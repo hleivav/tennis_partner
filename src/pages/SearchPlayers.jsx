@@ -25,25 +25,20 @@ export default function SearchPlayers() {
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
   const [invitedIds, setInvitedIds] = useState([]);
 
-  useEffect(() => {
-    function updateUser() {
-      setCurrentUser(getCurrentUser());
-    }
-    window.addEventListener('storage', updateUser);
-    return () => window.removeEventListener('storage', updateUser);
-  }, []);
+  // Ingen mockad storage-lyssnare behövs längre
 
   useEffect(() => {
+    if (!currentUser) return;
     apiListUsers().then(list => {
       // Visa inte dig själv
-      setUsers(list.filter(u => !currentUser || u.id !== currentUser.id));
+      setUsers(list.filter(u => u.id !== currentUser.id));
       console.log('Alla användare:', list);
     });
   }, [currentUser]);
 
   useEffect(() => {
+    if (!currentUser) return;
     async function fetchInvited() {
-      if (!currentUser) return;
       // Hämta aktuell användare från "servern" för att få senaste id
       const freshUser = await apiGetUserById(currentUser.id);
       // Hämta alla användare som fått inbjudan från denna användare
@@ -55,6 +50,11 @@ export default function SearchPlayers() {
     }
     fetchInvited();
   }, [currentUser, chosen]);
+
+  // Om inte inloggad, visa meddelande och returnera direkt
+  if (!currentUser) {
+    return <main style={{ padding: 20 }}><h1>Sök spelare</h1><p>Du är inte inloggad.</p></main>;
+  }
 
   // Filtrera användare: visa alla utom dig själv
   const filtered = users.filter(u =>

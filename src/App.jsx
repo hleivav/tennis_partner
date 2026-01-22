@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Matches from './pages/Matches';
 import Admin from './pages/Admin';
+import ResetPassword from './pages/ResetPassword';
+console.log('[App.jsx] App loaded');
 import SearchPlayers from './pages/SearchPlayers';
 import Invitations from './pages/Invitations';
 import './App.css';
@@ -24,6 +26,7 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/matches" element={<Matches />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/search" element={<SearchPlayers />} />
         <Route path="/invitations" element={<Invitations />} />
       </Routes>

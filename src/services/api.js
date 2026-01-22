@@ -1,192 +1,178 @@
-// Send an invitation from one user to another
-export async function apiSendInvitation(fromUserId, toUserId) {
-  const db = readDb();
-  const fromUser = db.users.find(u => u.id === fromUserId);
-  const toUser = db.users.find(u => u.id === toUserId);
-  if (!fromUser || !toUser) throw new Error('User not found');
-  if (!toUser.invitations) toUser.invitations = [];
-  // Avoid duplicate invitations
-  if (!toUser.invitations.some(inv => inv.fromId === fromUserId)) {
-    toUser.invitations.push({ fromId: fromUserId, status: 'new' });
-    writeDb(db);
+// Acceptera en inbjudan
+export async function apiAcceptInvitation(invitationId) {
+  const res = await fetch(`http://localhost:8080/api/invitations/${invitationId}/accept`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) throw new Error('Kunde inte acceptera inbjudan');
+  return await res.json();
+}
+
+// Ignorera en inbjudan
+export async function apiIgnoreInvitation(invitationId) {
+  const res = await fetch(`http://localhost:8080/api/invitations/${invitationId}/ignore`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) throw new Error('Kunde inte ignorera inbjudan');
+  return await res.json();
+}
+// Hämta inbjudningar för en viss mottagare
+export async function apiListInvitations(receiverId) {
+  const url = `http://localhost:8080/api/invitations?receiverId=${receiverId}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Kunde inte hämta inbjudningar');
+  return await res.json();
+}
+// Återställ lösenord via backend
+export async function apiResetPassword(token, newPassword) {
+  const res = await fetch('http://localhost:8080/api/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Kunde inte återställa lösenordet');
   }
   return true;
 }
-// Utility: Delete all users except superadmin
-export function deleteAllUsersExceptSuperadmin() {
-  const db = readDb();
-  if (db.users) {
-    db.users = db.users.filter(u => u.email === 'hleiva@hotmail.com');
-    writeDb(db);
+// Skickar riktig forgot-password-request till backend
+export async function apiForgotPassword(email) {
+  const res = await fetch('http://localhost:8080/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Kunde inte skicka återställningslänk');
   }
+  return true;
 }
-// Utility: Clear all invitations for all users
-export function clearAllInvitations() {
-  const db = readDb();
-  if (db.users) {
-    db.users.forEach(u => { u.invitations = []; });
-    writeDb(db);
-  }
+// Skickar inbjudan via backend-API
+export async function apiSendInvitation(senderId, receiverId) {
+  const res = await fetch('http://localhost:8080/api/invitations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ senderId, receiverId })
+  });
+  if (!res.ok) throw new Error('Kunde inte skicka inbjudan');
+  return true;
 }
-// Admin config API
+// Dessa mock-utils tas bort, hanteras nu i backend
+// Admin config API (exempel, byt till backend-API om det finns)
 export async function apiGetAdminConfig() {
-  await delay(150);
-  const db = readDb();
-  if (!db.adminConfig) db.adminConfig = { name: '', deadline: '' };
-  return { ...db.adminConfig };
+  const res = await fetch('http://localhost:8080/api/admin/config');
+  if (!res.ok) throw new Error('Kunde inte hämta admininställningar');
+  const data = await res.json();
+  // Map backend 'tournamentName' to frontend 'name' for compatibility
+  return {
+    name: data.tournamentName || data.name || '',
+    deadline: data.deadline || ''
+  };
 }
-
 export async function apiSaveAdminConfig(cfg) {
-  await delay(150);
-  const db = readDb();
-  db.adminConfig = { ...cfg };
-  writeDb(db);
-  return { ...db.adminConfig };
+  // Skicka med id: 1 och rätt fältnamn
+  const payload = {
+    id: 1,
+    tournamentName: cfg.name,
+    deadline: cfg.deadline
+  };
+  const res = await fetch('http://localhost:8080/api/admin/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Kunde inte spara admininställningar');
+  const data = await res.json();
+  return {
+    name: data.tournamentName || data.name || '',
+    deadline: data.deadline || ''
+  };
 }
-const DB_KEY = 'tp_db';
-
-function readDb() {
-  try {
-    const raw = localStorage.getItem(DB_KEY) || JSON.stringify({ users: [] });
-    const db = JSON.parse(raw);
-    if (!db.users) db.users = [];
-
-    // Ensure superadmin always exists and has correct password
-    const idx = db.users.findIndex(u => u.email === 'hleiva@hotmail.com');
-    if (idx === -1) {
-      db.users.push({
-        id: 9999,
-        name: 'Superadmin',
-        email: 'hleiva@hotmail.com',
-        phone: '070-000 00 00',
-        level: 'Avancerad',
-        avatar: new URL('../assets/images/spelare1.png', import.meta.url).href,
-        seekingPartner: false,
-        password: 'superadmin',
-        invitations: [],
-      });
-      localStorage.setItem(DB_KEY, JSON.stringify(db));
-    } else if (db.users[idx].password !== 'superadmin') {
-      db.users[idx].password = 'superadmin';
-      localStorage.setItem(DB_KEY, JSON.stringify(db));
-    }
-
-    return db;
-  } catch (e) {
-    return { users: [] };
-  }
-}
-
-function writeDb(db) {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
-}
-
-function delay(ms = 300) {
-  return new Promise((res) => setTimeout(res, ms));
-}
+// Mock-databasfunktioner borttagna
 
 export async function apiRegister(user) {
-  await delay(400);
-  const db = readDb();
-  const normalizedEmail = (user.email || '').trim().toLowerCase();
-  if (db.users.find((u) => (u.email || '').trim().toLowerCase() === normalizedEmail)) {
-    const err = new Error('En användare med denna e-post finns redan');
-    err.code = 'EMAIL_EXISTS';
-    throw err;
+  const res = await fetch('http://localhost:8080/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(user)
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Kunde inte registrera användare');
   }
-  const newUser = { ...user, id: Date.now(), email: normalizedEmail };
-  db.users.push(newUser);
-  writeDb(db);
-  const { password, ...publicUser } = newUser;
-  return publicUser;
+  return await res.json();
 }
 
 export async function apiLogin(email, password) {
-  await delay(250);
-  const db = readDb();
-  const normalizedEmail = (email || '').trim().toLowerCase();
-  console.log('DEBUG apiLogin: users=', db.users, 'loginEmail=', normalizedEmail, 'loginPassword=', password);
-  const user = db.users.find((u) => ((u.email || '').trim().toLowerCase() === normalizedEmail) && u.password === password);
-  if (!user) {
-    console.log('DEBUG apiLogin: Ingen matchande användare hittades');
-    throw new Error('Fel e-post eller lösenord');
+  console.log('[api.js] apiLogin: POST', { email, password });
+  const res = await fetch('http://localhost:8080/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    console.log('[api.js] apiLogin: error response', data);
+    throw new Error(data.message || 'Fel e-post eller lösenord');
   }
-  const { password: pw, ...publicUser } = user;
-  const token = btoa(JSON.stringify({ id: user.id, t: Date.now() }));
-  return { user: publicUser, token };
+  const json = await res.json();
+  console.log('[api.js] apiLogin: success response', json);
+  return json;
 }
 
 export async function apiUpdateUser(updated) {
-  await delay(200);
-  const db = readDb();
-  const idx = db.users.findIndex((u) => u.id === updated.id);
-  if (idx === -1) throw new Error('Användare hittades inte');
-  db.users[idx] = { ...db.users[idx], ...updated };
-  writeDb(db);
-  const { password, ...publicUser } = db.users[idx];
-  return publicUser;
+  const res = await fetch('http://localhost:8080/api/users/' + updated.id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updated)
+  });
+  if (!res.ok) throw new Error('Kunde inte uppdatera användare');
+  return await res.json();
 }
 
 export async function apiGetUserById(id) {
-  const db = readDb();
-  const user = db.users.find((u) => u.id === id);
-  if (!user) return null;
-  const { password, ...publicUser } = user;
-  return publicUser;
+  const res = await fetch('http://localhost:8080/api/users/' + id);
+  if (!res.ok) return null;
+  return await res.json();
 }
 
 export async function apiListUsers() {
-  const db = readDb();
-  return db.users.map(({ password, ...u }) => u);
+  const res = await fetch('http://localhost:8080/api/users');
+  if (!res.ok) throw new Error('Kunde inte hämta användarlista');
+  return await res.json();
 }
 
-// Matches API
+// Matches API (exempel, byt till backend-API endpoints)
 export async function apiCreateMatch(match) {
-  await delay(200);
-  const db = readDb();
-  if (!db.matches) db.matches = [];
-  const newMatch = { ...match, id: Date.now(), participants: [] };
-  db.matches.push(newMatch);
-  writeDb(db);
-  return newMatch;
+  const res = await fetch('http://localhost:8080/api/matches', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(match)
+  });
+  if (!res.ok) throw new Error('Kunde inte skapa match');
+  return await res.json();
 }
-
 export async function apiListMatches() {
-  await delay(150);
-  const db = readDb();
-  return (db.matches || []).map((m) => ({ ...m }));
+  const res = await fetch('http://localhost:8080/api/matches');
+  if (!res.ok) throw new Error('Kunde inte hämta matcher');
+  return await res.json();
 }
-
 export async function apiGetMatchById(id) {
-  const db = readDb();
-  const m = (db.matches || []).find((x) => x.id === id);
-  if (!m) return null;
-  return { ...m };
+  const res = await fetch('http://localhost:8080/api/matches/' + id);
+  if (!res.ok) return null;
+  return await res.json();
 }
-
 export async function apiJoinMatch(matchId, userId) {
-  await delay(150);
-  const db = readDb();
-  if (!db.matches) db.matches = [];
-  const idx = db.matches.findIndex((m) => m.id === matchId);
-  if (idx === -1) throw new Error('Match hittades inte');
-  const match = db.matches[idx];
-  if (!match.participants) match.participants = [];
-  if (match.participants.includes(userId)) throw new Error('Du är redan med i matchen');
-  if (match.maxParticipants && match.participants.length >= match.maxParticipants) throw new Error('Matchen är full');
-  match.participants.push(userId);
-  db.matches[idx] = match;
-  writeDb(db);
-  return { ...match };
+  const res = await fetch(`http://localhost:8080/api/matches/${matchId}/join`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId })
+  });
+  if (!res.ok) throw new Error('Kunde inte gå med i matchen');
+  return await res.json();
 }
 
-// Password reset (mocked): sets a new password for the user with the given email
-export async function apiResetPassword(email, newPassword) {
-  await delay(150);
-  const db = readDb();
-  const idx = db.users.findIndex((u) => u.email === email);
-  if (idx === -1) throw new Error('Ingen användare med denna e-post');
-  db.users[idx].password = newPassword;
-  writeDb(db);
-  return true;
-}
+// Password reset tas bort, hanteras nu via backend

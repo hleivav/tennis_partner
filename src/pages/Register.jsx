@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../services/auth';
+import { register, getCurrentUser } from '../services/auth';
 import { validateRegistration } from '../utils/validation';
 
 
 export default function Register() {
   const avatarImages = Array.from({ length: 9 }).map((_, i) => new URL(`../assets/images/spelare${i + 1}.png`, import.meta.url).href);
   const [form, setForm] = useState({ name: '', email: '', phone: '', level: 'Nybörjare', password: '', confirm: '', avatar: avatarImages[0] });
+  const [user, setUser] = useState(getCurrentUser());
   const [errors, setErrors] = useState({});
   const [serverErr, setServerErr] = useState('');
   const [avatarIndex, setAvatarIndex] = useState(0);
@@ -38,7 +39,8 @@ export default function Register() {
     setServerErr('');
     try {
       await register({ name: form.name, email: form.email, phone: form.phone, level: form.level, password: form.password, avatar: form.avatar, seekingPartner: !!form.seekingPartner });
-      navigate('/profile');
+      setUser(getCurrentUser());
+      navigate('/');
     } catch (err) {
       setServerErr(err.message);
     }

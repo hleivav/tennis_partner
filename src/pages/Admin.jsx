@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/forms.css';
-import { apiGetAdminConfig, apiSaveAdminConfig, deleteAllUsersExceptSuperadmin, apiListUsers } from '../services/api';
+import { apiGetAdminConfig, apiSaveAdminConfig, apiListUsers } from '../services/api';
 
 export default function Admin() {
+    async function handleDeleteAllUsers() {
+      if (!window.confirm('Är du säker på att du vill ta bort alla spelare utom superadmin?')) return;
+      await fetch('http://localhost:8080/api/users/all-except-superadmin', { method: 'DELETE' });
+      setAllUsers(users => users.filter(u => u.email === 'hleiva@hotmail.com'));
+      alert('Alla spelare utom superadmin har tagits bort.');
+    }
   const [form, setForm] = useState({ name: '', deadline: '' });
   const [saved, setSaved] = useState(null);
   const [error, setError] = useState('');
   const [allUsers, setAllUsers] = useState([]);
 
-  useEffect(() => {
+  // Ladda admin-config endast vid knapptryck
+  function loadConfig() {
     apiGetAdminConfig()
       .then(cfg => {
         setForm({
@@ -18,7 +25,7 @@ export default function Admin() {
         setSaved(cfg);
       })
       .catch(() => {});
-  }, []);
+  }
 
   useEffect(() => {
     apiListUsers().then(setAllUsers);
@@ -45,17 +52,12 @@ export default function Admin() {
     }
   }
 
-  function handleDeleteAllUsers() {
-    if (window.confirm('Är du säker på att du vill ta bort ALLA spelare utom superadmin?')) {
-      deleteAllUsersExceptSuperadmin();
-      setAllUsers([]);
-      alert('Alla spelare utom superadmin har tagits bort.');
-    }
-  }
+  // Funktion för att ta bort alla användare utom superadmin är borttagen (mock-funktion)
 
   return (
     <main style={{ padding: 20 }}>
       <h1>Admin</h1>
+      <button style={{ marginBottom: 16 }} onClick={loadConfig}>Ladda admininställningar</button>
       <div className="card" style={{ marginTop: 0 }}>
         <form onSubmit={onSubmit} style={{ display: 'grid', gap: 12 }}>
           <label>

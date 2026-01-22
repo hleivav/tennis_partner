@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/images/logo.svg';
 import { getCurrentUser, logout } from '../services/auth';
-import { apiGetUserById } from '../services/api';
+import { apiGetUserById, apiListInvitations } from '../services/api';
 
 export default function NavBar() {
   const [user, setUser] = useState(null);
@@ -11,17 +11,45 @@ export default function NavBar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setUser(getCurrentUser());
-    const onStorage = () => setUser(getCurrentUser());
+    const userNow = getCurrentUser();
+    console.log('[NavBar] useEffect[]: initial user =', userNow);
+    console.log('[NavBar] useEffect[]: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
+    setUser(userNow);
+    const onAuthChange = () => {
+      const u = getCurrentUser();
+      console.log('[NavBar] onAuthChange: user =', u);
+      console.log('[NavBar] onAuthChange: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
+      setUser(u);
+    };
+    const onStorage = () => {
+      const u = getCurrentUser();
+      console.log('[NavBar] onStorage: user =', u);
+      console.log('[NavBar] onStorage: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
+      setUser(u);
+    };
+    window.addEventListener('authchange', onAuthChange);
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('authchange', onAuthChange);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
+
+  useEffect(() => {
+    console.log('[NavBar] user state changed:', user);
+    console.log('[NavBar] localStorage snapshot:', {...window.localStorage});
+    console.log('[NavBar] user state changed: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
+  }, [user]);
 
   useEffect(() => {
     async function checkInvitations() {
       if (!user) return;
-      const freshUser = await apiGetUserById(user.id);
-      setHasNewInvitations((freshUser?.invitations || []).some(inv => inv.status === 'new'));
+      try {
+        const invitations = await apiListInvitations(user.id);
+        setHasNewInvitations(invitations.some(inv => !inv.status || inv.status === 'new'));
+      } catch (e) {
+        setHasNewInvitations(false);
+      }
     }
     checkInvitations();
   }, [user]);
@@ -47,7 +75,7 @@ export default function NavBar() {
         </button>
         <nav id="main-nav" className={`site-nav ${open ? 'open' : ''}`} aria-label="Huvudnavigering">
           <Link to="/" onClick={() => setOpen(false)}>Hem</Link>
-          {user && user.email === 'hleiva@hotmail.com' && (
+          {user && user.role === 'SUPERADMIN' && (
             <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>
           )}
           {!user && (
