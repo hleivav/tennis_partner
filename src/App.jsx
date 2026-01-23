@@ -1,3 +1,5 @@
+// Test-rad för att verifiera deployment-version
+window.TEST_DEPLOY = "20260123";
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
