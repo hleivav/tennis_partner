@@ -1,6 +1,8 @@
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Sätt en inbjudan till pending
 export async function apiPendingInvitation(invitationId) {
-  const res = await fetch(`http://localhost:8080/api/invitations/${invitationId}/pending`, {
+  const res = await fetch(`${API_URL}/api/invitations/${invitationId}/pending`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -9,7 +11,7 @@ export async function apiPendingInvitation(invitationId) {
 }
 // Acceptera en inbjudan
 export async function apiAcceptInvitation(invitationId) {
-  const res = await fetch(`http://localhost:8080/api/invitations/${invitationId}/accept`, {
+  const res = await fetch(`${API_URL}/api/invitations/${invitationId}/accept`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -19,7 +21,7 @@ export async function apiAcceptInvitation(invitationId) {
 
 // Ignorera en inbjudan
 export async function apiIgnoreInvitation(invitationId) {
-  const res = await fetch(`http://localhost:8080/api/invitations/${invitationId}/ignore`, {
+  const res = await fetch(`${API_URL}/api/invitations/${invitationId}/ignore`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -28,14 +30,14 @@ export async function apiIgnoreInvitation(invitationId) {
 }
 // Hämta inbjudningar för en viss mottagare
 export async function apiListInvitations(receiverId) {
-  const url = `http://localhost:8080/api/invitations?receiverId=${receiverId}`;
+  const url = `${API_URL}/api/invitations?receiverId=${receiverId}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Kunde inte hämta inbjudningar');
   return await res.json();
 }
 // Återställ lösenord via backend
 export async function apiResetPassword(token, newPassword) {
-  const res = await fetch('http://localhost:8080/api/auth/reset-password', {
+  const res = await fetch(`${API_URL}/api/auth/reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token, newPassword })
@@ -48,7 +50,7 @@ export async function apiResetPassword(token, newPassword) {
 }
 // Skickar riktig forgot-password-request till backend
 export async function apiForgotPassword(email) {
-  const res = await fetch('http://localhost:8080/api/auth/forgot-password', {
+  const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email })
@@ -61,7 +63,7 @@ export async function apiForgotPassword(email) {
 }
 // Skickar inbjudan via backend-API
 export async function apiSendInvitation(senderId, receiverId) {
-  const res = await fetch('http://localhost:8080/api/invitations', {
+  const res = await fetch(`${API_URL}/api/invitations`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ senderId, receiverId })
@@ -72,7 +74,7 @@ export async function apiSendInvitation(senderId, receiverId) {
 // Dessa mock-utils tas bort, hanteras nu i backend
 // Admin config API (exempel, byt till backend-API om det finns)
 export async function apiGetAdminConfig() {
-  const res = await fetch('http://localhost:8080/api/admin/config');
+  const res = await fetch(`${API_URL}/api/admin/config`);
   if (!res.ok) throw new Error('Kunde inte hämta admininställningar');
   const data = await res.json();
   // Map backend 'tournamentName' to frontend 'name' for compatibility
@@ -88,7 +90,7 @@ export async function apiSaveAdminConfig(cfg) {
     tournamentName: cfg.name,
     deadline: cfg.deadline
   };
-  const res = await fetch('http://localhost:8080/api/admin/config', {
+  const res = await fetch(`${API_URL}/api/admin/config`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -103,7 +105,7 @@ export async function apiSaveAdminConfig(cfg) {
 // Mock-databasfunktioner borttagna
 
 export async function apiRegister(user) {
-  const res = await fetch('http://localhost:8080/api/auth/register', {
+  const res = await fetch(`${API_URL}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user)
@@ -117,7 +119,7 @@ export async function apiRegister(user) {
 
 export async function apiLogin(email, password) {
   console.log('[api.js] apiLogin: POST', { email, password });
-  const res = await fetch('http://localhost:8080/api/auth/login', {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
@@ -133,7 +135,7 @@ export async function apiLogin(email, password) {
 }
 
 export async function apiUpdateUser(updated) {
-  const res = await fetch('http://localhost:8080/api/users/' + updated.id, {
+  const res = await fetch(`${API_URL}/api/users/` + updated.id, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updated)
@@ -143,20 +145,20 @@ export async function apiUpdateUser(updated) {
 }
 
 export async function apiGetUserById(id) {
-  const res = await fetch('http://localhost:8080/api/users/' + id);
+  const res = await fetch(`${API_URL}/api/users/` + id);
   if (!res.ok) return null;
   return await res.json();
 }
 
 export async function apiListUsers() {
-  const res = await fetch('http://localhost:8080/api/users');
+  const res = await fetch(`${API_URL}/api/users`);
   if (!res.ok) throw new Error('Kunde inte hämta användarlista');
   return await res.json();
 }
 
 // Matches API (exempel, byt till backend-API endpoints)
 export async function apiCreateMatch(match) {
-  const res = await fetch('http://localhost:8080/api/matches', {
+  const res = await fetch(`${API_URL}/api/matches`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(match)
@@ -165,17 +167,17 @@ export async function apiCreateMatch(match) {
   return await res.json();
 }
 export async function apiListMatches() {
-  const res = await fetch('http://localhost:8080/api/matches');
+  const res = await fetch(`${API_URL}/api/matches`);
   if (!res.ok) throw new Error('Kunde inte hämta matcher');
   return await res.json();
 }
 export async function apiGetMatchById(id) {
-  const res = await fetch('http://localhost:8080/api/matches/' + id);
+  const res = await fetch(`${API_URL}/api/matches/` + id);
   if (!res.ok) return null;
   return await res.json();
 }
 export async function apiJoinMatch(matchId, userId) {
-  const res = await fetch(`http://localhost:8080/api/matches/${matchId}/join`, {
+  const res = await fetch(`${API_URL}/api/matches/${matchId}/join`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId })
