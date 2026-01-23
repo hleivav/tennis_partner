@@ -26,7 +26,6 @@ export default function Invitations() {
     setUser(u);
     // Hämta inbjudningar från backend
     apiListInvitations(u.id).then(invList => {
-      console.log('[Invitations.jsx] apiListInvitations response:', invList);
       setInvitations(invList);
       // Hämta avsändarens info för varje inbjudan
       Promise.all(invList.map(inv => inv.sender && inv.sender.id ? apiGetUserById(inv.sender.id) : null)).then(users => {

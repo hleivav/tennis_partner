@@ -32,7 +32,6 @@ export default function SearchPlayers() {
     apiListUsers().then(list => {
       // Visa inte dig själv
       setUsers(list.filter(u => u.id !== currentUser.id));
-      console.log('Alla användare:', list);
     });
   }, [currentUser]);
 

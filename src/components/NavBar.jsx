@@ -12,19 +12,13 @@ export default function NavBar() {
 
   useEffect(() => {
     const userNow = getCurrentUser();
-    console.log('[NavBar] useEffect[]: initial user =', userNow);
-    console.log('[NavBar] useEffect[]: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
     setUser(userNow);
     const onAuthChange = () => {
       const u = getCurrentUser();
-      console.log('[NavBar] onAuthChange: user =', u);
-      console.log('[NavBar] onAuthChange: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
       setUser(u);
     };
     const onStorage = () => {
       const u = getCurrentUser();
-      console.log('[NavBar] onStorage: user =', u);
-      console.log('[NavBar] onStorage: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
       setUser(u);
     };
     window.addEventListener('authchange', onAuthChange);
@@ -36,9 +30,7 @@ export default function NavBar() {
   }, []);
 
   useEffect(() => {
-    console.log('[NavBar] user state changed:', user);
-    console.log('[NavBar] localStorage snapshot:', {...window.localStorage});
-    console.log('[NavBar] user state changed: localStorage CURR_KEY =', localStorage.getItem('tp_current'));
+    // No debug logs
   }, [user]);
 
   useEffect(() => {
@@ -46,7 +38,6 @@ export default function NavBar() {
       if (!user) return;
       try {
         const invitations = await apiListInvitations(user.id);
-        console.log('[NavBar] invitations från backend:', invitations);
         setHasNewInvitations(invitations.some(inv => !inv.status || inv.status === 'new'));
       } catch (e) {
         setHasNewInvitations(false);

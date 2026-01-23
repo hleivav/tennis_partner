@@ -9,7 +9,6 @@ import Profile from './pages/Profile';
 import Matches from './pages/Matches';
 import Admin from './pages/Admin';
 import ResetPassword from './pages/ResetPassword';
-console.log('[App.jsx] App loaded');
 import SearchPlayers from './pages/SearchPlayers';
 import Invitations from './pages/Invitations';
 import './App.css';

@@ -118,7 +118,6 @@ export async function apiRegister(user) {
 }
 
 export async function apiLogin(email, password) {
-  console.log('[api.js] apiLogin: POST', { email, password });
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -126,11 +125,9 @@ export async function apiLogin(email, password) {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    console.log('[api.js] apiLogin: error response', data);
     throw new Error(data.message || 'Fel e-post eller lösenord');
   }
   const json = await res.json();
-  console.log('[api.js] apiLogin: success response', json);
   return json;
 }
 

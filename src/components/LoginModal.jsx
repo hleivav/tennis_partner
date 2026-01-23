@@ -14,13 +14,10 @@ export default function LoginModal({ onClose }) {
 
   async function onSubmit(e) {
     e.preventDefault();
-    console.log('[LoginModal] onSubmit called', form);
     setErr('');
     setMsg('');
     try {
       const user = await login((form.email || '').trim(), form.password);
-      console.log('[LoginModal] login() return:', user);
-      console.log('[LoginModal] localStorage snapshot after login:', {...window.localStorage});
       setMsg('Inloggning lyckades!');
       setTimeout(() => {
         setMsg('');

@@ -13,7 +13,6 @@ export default function ResetPassword() {
   const token = searchParams.get('token');
 
   useEffect(() => {
-    console.log('[ResetPassword] token:', token);
   }, [token]);
 
   async function handleSubmit(e) {
