@@ -5,7 +5,8 @@ import { apiGetAdminConfig, apiSaveAdminConfig, apiListUsers } from '../services
 export default function Admin() {
     async function handleDeleteAllUsers() {
       if (!window.confirm('Är du säker på att du vill ta bort alla spelare utom superadmin?')) return;
-      await fetch('http://localhost:8080/api/users/all-except-superadmin', { method: 'DELETE' });
+      const API_URL = import.meta.env.VITE_API_URL;
+      await fetch(`${API_URL}/api/users/all-except-superadmin`, { method: 'DELETE' });
       setAllUsers(users => users.filter(u => u.email === 'hleiva@hotmail.com'));
       alert('Alla spelare utom superadmin har tagits bort.');
     }
