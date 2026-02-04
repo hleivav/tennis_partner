@@ -10,15 +10,10 @@
   display: flex;
   align-items: center;
   overflow: visible;
-
-/* Ensure nav does not wrap or increase header height */
-.site-nav { display:flex; gap:12px; align-items:center; flex-wrap:nowrap; overflow:hidden; }
-.site-nav a { display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
-.site-nav .user { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.site-nav button { display:inline-block; }
+}
 
 /* subtle drop shadow on header contents to improve contrast over image */
- .site-header .inner { text-shadow: none; }
+.site-header .inner { text-shadow: none; }
 .site-header .inner {
   max-width: 1100px;
   margin: 0 auto;
@@ -26,7 +21,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-}
 }
 .site-header .logo {
   width: 36px;
