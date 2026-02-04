@@ -65,10 +65,48 @@ export default function NavBar() {
     <header className="site-header">
       <div className="inner">
         <img src={logo} alt="TennisPartner" className="logo" />
+        
+        {/* Desktop navigation - always visible on large screens */}
+        <nav className="site-nav desktop-nav" aria-label="Huvudnavigering">
+          <Link to="/">Hem</Link>
+          {user && user.role === 'SUPERADMIN' && (
+            <Link to="/admin">Admin</Link>
+          )}
+          {!user && (
+            <Link to="/register">Registrering</Link>
+          )}
+          <Link to="/search">Sök medspelare</Link>
+          <Link to="/invitations" style={{ position: 'relative', display: 'inline-block' }}>
+            Inbjudan
+            {user && hasNewInvitations && (
+              <span style={{
+                position: 'absolute',
+                top: -4,
+                right: -8,
+                width: 10,
+                height: 10,
+                background: '#e6b800',
+                borderRadius: '50%',
+                border: '2px solid #fff'
+              }} />
+            )}
+          </Link>
+          {user ? (
+            <>
+              <Link to="/profile">{user.name}</Link>
+              <button onClick={handleLogout} style={{ background: '#fff', color: '#1A2A80', border: '1px solid #ccc', borderRadius: 6, padding: '6px 12px', fontWeight: 600, cursor: 'pointer' }}>Logga ut</button>
+            </>
+          ) : (
+            <button className="login-button" onClick={() => { navigate('/'); setTimeout(() => window.dispatchEvent(new Event('open-login-modal')), 50); }}>Logga in</button>
+          )}
+        </nav>
+
+        {/* Hamburger button for mobile */}
         <button className="hamburger" aria-controls="main-nav" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{color:'currentColor'}}><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
-        {/* Overlay and menu only rendered when open */}
+
+        {/* Mobile menu - only rendered when open */}
         {open && (
           <>
             <div
@@ -84,7 +122,7 @@ export default function NavBar() {
               }}
               onClick={() => setOpen(false)}
             />
-            <nav id="main-nav" className="site-nav open" aria-label="Huvudnavigering" style={{zIndex: 1010, position: 'fixed', left: 0, right: 0, top: 64, margin: '0 auto', maxWidth: 320}}>
+            <nav id="main-nav" className="site-nav mobile-nav open" aria-label="Huvudnavigering" style={{zIndex: 1010, position: 'fixed', left: 0, right: 0, top: 64, margin: '0 auto', maxWidth: 320}}>
               <Link to="/" onClick={() => setOpen(false)}>Hem</Link>
               {user && user.role === 'SUPERADMIN' && (
                 <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>
