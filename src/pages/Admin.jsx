@@ -7,7 +7,7 @@ export default function Admin() {
       if (!window.confirm('Är du säker på att du vill ta bort alla spelare utom superadmin?')) return;
       const API_URL = import.meta.env.VITE_API_URL;
       await fetch(`${API_URL}/api/users/all-except-superadmin`, { method: 'DELETE' });
-      setAllUsers(users => users.filter(u => u.email === 'hleiva@hotmail.com'));
+      setAllUsers(users => users.filter(u => u.role === 'SUPERADMIN'));
       alert('Alla spelare utom superadmin har tagits bort.');
     }
   const [form, setForm] = useState({ name: '', deadline: '' });
@@ -90,7 +90,7 @@ export default function Admin() {
       <div className="card" style={{ marginTop: 24 }}>
         <h2>Alla spelare</h2>
         <ul>
-          {allUsers.filter(u => u.email !== 'hleiva@hotmail.com').map(u => (
+          {allUsers.filter(u => u.role !== 'SUPERADMIN').map(u => (
             <li key={u.id}>{u.name} ({u.email})</li>
           ))}
         </ul>
