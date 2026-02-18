@@ -184,3 +184,8 @@ export async function apiJoinMatch(matchId, userId) {
 }
 
 // Password reset tas bort, hanteras nu via backend
+
+export async function apiResetPlayersToDefault() {
+  const res = await fetch(`${API_URL}/api/users/reset-to-default`, { method: 'POST' });
+  if (!res.ok) throw new Error('Kunde inte återställa spelare');
+}

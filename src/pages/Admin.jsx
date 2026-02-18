@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/forms.css';
-import { apiGetAdminConfig, apiSaveAdminConfig, apiListUsers } from '../services/api';
+import { apiGetAdminConfig, apiSaveAdminConfig, apiListUsers, apiResetPlayersToDefault } from '../services/api';
 
 export default function Admin() {
     async function handleDeleteAllUsers() {
@@ -96,6 +96,21 @@ export default function Admin() {
         </ul>
         <button style={{ background: '#c00', color: '#fff', marginTop: 12 }} onClick={handleDeleteAllUsers}>
           Ta bort alla spelare utom superadmin
+        </button>
+        <button
+          style={{ background: '#e67e00', color: '#fff', marginTop: 8, marginLeft: 8 }}
+          onClick={async () => {
+            if (!window.confirm('Vill du nollställa alla spelare till default? Alla inbjudningar tas bort och ingen spelare blir synlig för inbjudningar.')) return;
+            try {
+              await apiResetPlayersToDefault();
+              setAllUsers(users => users.map(u => ({ ...u, seekingPartner: false })));
+              alert('Alla spelare har återställts till default.');
+            } catch (e) {
+              alert('Fel: ' + e.message);
+            }
+          }}
+        >
+          Reset spelare till default
         </button>
       </div>
     </main>
